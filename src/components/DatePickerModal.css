@@ -1,0 +1,50 @@
+/* DatePickerModal.css */
+.custom-calendar {
+    --calendar-background: white;
+    --calendar-border-color: #e6e6e6;
+    --calendar-border-radius: 8px;
+    --calendar-box-shadow: none;
+    --calendar-color: black;
+    --calendar-day-background: white;
+    --calendar-day-color: black;
+    --calendar-today-background: #f0f0f0;
+    --calendar-today-color: black;
+    --calendar-hover-background: #f0f0f0;
+  }
+  
+  .custom-calendar button {
+    color: var(--calendar-color);
+  }
+  
+  .custom-calendar button:disabled {
+    color: #ccc;
+  }
+  
+  .custom-calendar .react-calendar__tile {
+    background: var(--calendar-day-background);
+    color: var(--calendar-day-color);
+  }
+  
+  .custom-calendar .react-calendar__tile--now {
+    background: var(--calendar-today-background);
+    color: var(--calendar-today-color);
+  }
+  
+  .custom-calendar .react-calendar__tile--now:hover {
+    background: var(--calendar-today-background);
+  }
+  
+  .custom-calendar .react-calendar__tile--active {
+    background: var(--calendar-hover-background);
+    color: var(--calendar-color);
+  }
+  
+  .custom-calendar .react-calendar__tile--hover {
+    background: var(--calendar-hover-background);
+  }
+  
+  .custom-calendar .booked {
+    background: red !important;
+    color: white !important;
+  }
+  
