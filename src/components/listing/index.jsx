@@ -20,7 +20,7 @@ export default function VenueCreationForm({ onAddVenue }) {
   const [continent, setContinent] = useState("");
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
-  const [media, setMedia] = useState([{ url: "", alt: "" }]);
+  const [mediaUrl, setMediaUrl] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isVenueManager, setIsVenueManager] = useState(false);
@@ -30,12 +30,6 @@ export default function VenueCreationForm({ onAddVenue }) {
     const venueManagerStatus = JSON.parse(localStorage.getItem("venueManager"));
     setIsVenueManager(venueManagerStatus);
   }, []);
-
-  const handleMediaChange = (index, field, value) => {
-    const newMedia = [...media];
-    newMedia[index][field] = value;
-    setMedia(newMedia);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -53,9 +47,7 @@ export default function VenueCreationForm({ onAddVenue }) {
         description,
         price: parseFloat(price),
         maxGuests: parseInt(maxGuests, 10),
-        media: media
-          .filter((item) => item.url !== "")
-          .map((item) => ({ url: item.url, alt: item.alt })),
+        media: [mediaUrl],
         meta: {
           wifi,
           parking,
@@ -73,8 +65,6 @@ export default function VenueCreationForm({ onAddVenue }) {
         },
       };
 
-      console.log("Request Data: ", requestData); // For debugging
-
       const response = await fetch(`${baseURL}/holidaze/venues`, {
         method: "POST",
         headers: {
@@ -85,9 +75,6 @@ export default function VenueCreationForm({ onAddVenue }) {
       });
 
       const data = await response.json();
-
-      console.log("Response: ", response); // For debugging
-      console.log("Response Data: ", data); // For debugging
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -192,32 +179,18 @@ export default function VenueCreationForm({ onAddVenue }) {
 
         <div>
           <label
-            htmlFor="media-url"
+            htmlFor="mediaUrl"
             className="block text-sm font-medium text-gray-700"
           >
             Media URL
           </label>
           <input
             type="text"
-            id="media-url"
+            id="mediaUrl"
             className="mt-1 block w-full rounded-md border border-gray-300 py-1.5 bg-white text-black shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            value={media[0].url}
-            onChange={(e) => handleMediaChange(0, "url", e.target.value)}
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="media-alt"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Alt Text
-          </label>
-          <input
-            type="text"
-            id="media-alt"
-            className="mt-1 block w-full rounded-md border border-gray-300 py-1.5 bg-white text-black shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            value={media[0].alt}
-            onChange={(e) => handleMediaChange(0, "alt", e.target.value)}
+            value={mediaUrl}
+            onChange={(e) => setMediaUrl(e.target.value)}
+            required
           />
         </div>
 

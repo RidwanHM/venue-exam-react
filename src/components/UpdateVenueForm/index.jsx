@@ -19,6 +19,7 @@ export default function UpdateVenueForm({ venue, onClose, onUpdate }) {
   const [continent, setContinent] = useState(venue.location?.continent || "");
   const [lat, setLat] = useState(venue.location?.lat || 0);
   const [lng, setLng] = useState(venue.location?.lng || 0);
+  const [mediaUrl, setMediaUrl] = useState(venue.media?.[0] || ""); // State for media URL
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -48,6 +49,7 @@ export default function UpdateVenueForm({ venue, onClose, onUpdate }) {
           lat: lat ? parseFloat(lat) : 0,
           lng: lng ? parseFloat(lng) : 0,
         },
+        media: [mediaUrl], // Include media URL
       };
 
       console.log("Request Data: ", requestData); // For debugging
@@ -153,6 +155,23 @@ export default function UpdateVenueForm({ venue, onClose, onUpdate }) {
               className="mt-1 block w-full rounded-md border border-gray-300 py-1 bg-white text-black shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               value={maxGuests}
               onChange={(e) => setMaxGuests(e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="mediaUrl"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Media URL
+            </label>
+            <input
+              type="text"
+              id="mediaUrl"
+              className="mt-1 block w-full rounded-md border border-gray-300 py-1 bg-white text-black shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              value={mediaUrl}
+              onChange={(e) => setMediaUrl(e.target.value)}
               required
             />
           </div>
@@ -333,7 +352,7 @@ export default function UpdateVenueForm({ venue, onClose, onUpdate }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-sm font-semibold leading-6 text-gray-900 "
+              className="text-sm font-semibold leading-6 text-gray-900"
             >
               Cancel
             </button>

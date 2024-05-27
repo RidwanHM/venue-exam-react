@@ -31,60 +31,58 @@ export default function Homefetch() {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
 
-      <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4">
+      <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-6">
         {filteredVenues.map((venue) => (
           <a
             key={venue.id}
             href={`/venue/?id=${venue.id}`}
-            className="bg-white-100 p-6 rounded-md border-2 border-blue-300 block"
+            className="bg-white p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300"
           >
             {venue.media && venue.media.length > 0 ? (
-              <>
-                {console.log(
-                  "Image URL:",
+              <img
+                className="w-full h-48 object-cover rounded-t-md"
+                src={
                   typeof venue.media[0] === "string"
                     ? venue.media[0]
                     : venue.media[0].url
-                )}{" "}
-                {/* Debugging: Check the image URL */}
-                <img
-                  className="mt-4"
-                  src={
-                    typeof venue.media[0] === "string"
-                      ? venue.media[0]
-                      : venue.media[0].url
-                  }
-                  alt={venue.name}
-                />
-              </>
+                }
+                alt={venue.name}
+              />
             ) : (
-              <div className="mt-4 bg-gray-200 h-48 flex items-center justify-center">
+              <div className="w-full h-48 bg-gray-200 flex items-center justify-center rounded-t-md">
                 <span className="text-gray-600">No Image Available</span>
               </div>
             )}
-            <h1 className="text-2xl font-bold mb-2 text-black overflow-hidden whitespace-nowrap text-overflow-ellipsis">
-              {venue.name}
-            </h1>
-            <p className="text-gray-600">{venue.description}</p>
-            <p className="text-gray-600">Price: ${venue.price}</p>
-            <p className="text-gray-600">Max Guests: {venue.maxGuests}</p>
-            <p className="text-gray-600">Rating: {venue.rating}</p>
-            {venue.meta && (
-              <div className="mt-2 text-gray-600">
-                {venue.meta.wifi && <span>WiFi</span>}
-                {venue.meta.parking && <span>Parking</span>}
-                {venue.meta.breakfast && <span>Breakfast</span>}
-                {venue.meta.pets && <span>Pets</span>}
-              </div>
-            )}
-            {venue.location && (
-              <div className="mt-2 text-gray-600">
-                <p>Address: {venue.location.address}</p>
-                <p>City: {venue.location.city}</p>
-                <p>Zip: {venue.location.zip}</p>
-                <p>Country: {venue.location.country}</p>
-              </div>
-            )}
+            <div className="mt-4">
+              <h1 className="text-xl font-bold mb-2 text-gray-800">
+                {venue.name}
+              </h1>
+              <p className="text-gray-600 mb-2">{venue.description}</p>
+              <p className="text-gray-600 mb-2">Price: ${venue.price}</p>
+              <p className="text-gray-600 mb-2">
+                Max Guests: {venue.maxGuests}
+              </p>
+              <p className="text-gray-600 mb-2">Rating: {venue.rating}</p>
+              {venue.meta && (
+                <div className="text-gray-600 mb-2">
+                  {venue.meta.wifi && <span className="mr-2">WiFi</span>}
+                  {venue.meta.parking && <span className="mr-2">Parking</span>}
+                  {venue.meta.breakfast && (
+                    <span className="mr-2">Breakfast</span>
+                  )}
+                  {venue.meta.pets && <span>Pets</span>}
+                </div>
+              )}
+              {venue.location && (
+                <div className="text-gray-600 mb-4">
+                  <p>Address: {venue.location.address}</p>
+                  <p>City: {venue.location.city}</p>
+                  <p>Zip: {venue.location.zip}</p>
+                  <p>Country: {venue.location.country}</p>
+                </div>
+              )}
+              <p className="text-blue-500 mt-4 font-semibold">See more</p>
+            </div>
           </a>
         ))}
       </div>

@@ -39,7 +39,7 @@ function ProfileVenues() {
       try {
         if (isVenueManager) {
           const venueResponse = await fetch(
-            `${baseURL}/holidaze/profiles/${storedUserName}/venues`,
+            `${baseURL}/holidaze/profiles/${storedUserName}/venues?_owner=true&_bookings=true`,
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -59,32 +59,15 @@ function ProfileVenues() {
           }
 
           const venuesData = await venueResponse.json();
-          console.log("Fetched venues:", venuesData); // Debugging: Check the fetched data
+          console.log("Fetched venues:", venuesData);
           setVenues(venuesData);
 
-          const bookingsResponse = await fetch(
-            `${baseURL}/holidaze/bookings?_venue=true`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-              },
-            }
+          const allBookings = venuesData.flatMap(
+            (venue) =>
+              venue.bookings.map((booking) => ({ ...booking, venue })) || []
           );
-
-          if (!bookingsResponse.ok) {
-            if (bookingsResponse.status === 401) {
-              console.error("Unauthorized. Please log in.");
-            } else {
-              console.error(
-                `Request failed with status: ${bookingsResponse.status}`
-              );
-            }
-            throw new Error("API request failed.");
-          }
-
-          const bookingsData = await bookingsResponse.json();
-          console.log("Fetched bookings:", bookingsData); // Debugging: Check the fetched data
-          setBookings(bookingsData.data || []);
+          console.log("All bookings from venues:", allBookings);
+          setBookings(allBookings);
         } else {
           const bookingsResponse = await fetch(
             `${baseURL}/holidaze/profiles/${storedUserName}/bookings?_venue=true`,
@@ -107,8 +90,8 @@ function ProfileVenues() {
           }
 
           const bookingsData = await bookingsResponse.json();
-          console.log("Fetched bookings:", bookingsData); // Debugging: Check the fetched data
-          setBookings(bookingsData.data || []);
+          console.log("Fetched bookings:", bookingsData);
+          setBookings(bookingsData || []);
         }
 
         setLoading(false);
@@ -127,19 +110,17 @@ function ProfileVenues() {
     console.log("Venues state:", venues);
     console.log("Bookings state:", bookings);
 
-    // Check the structure of each booking to ensure venue information is present
-    bookings.forEach((booking) => {
-      console.log(
-        "Booking venue ID:",
-        booking.venue ? booking.venue.id : "No venue"
-      );
-    });
-
     if (isVenueManager) {
       const venueIds = venues.map((venue) => venue.id);
       console.log("Venue IDs:", venueIds);
+
       const filtered = bookings.filter((booking) => {
-        return venueIds.includes(booking.venue?.id);
+        const bookingVenueId = booking.venue?.id;
+        const match = venueIds.includes(bookingVenueId);
+        console.log(
+          `Booking ID: ${booking.id}, Venue ID: ${bookingVenueId}, Match: ${match}`
+        );
+        return match;
       });
       console.log("Filtered bookings:", filtered);
       setFilteredBookings(filtered);
@@ -298,61 +279,10 @@ function ProfileVenues() {
         <p>Loading...</p>
       ) : (
         <>
-          <h2 className="text-2xl font-bold mt-6 mb-4">My Venues</h2>
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 py-6 px-4">
-            {venues.length > 0 ? (
-              venues.map((venue) => (
-                <div
-                  key={venue.id}
-                  className="bg-white p-6 rounded-md border-2 border-blue-300"
-                >
-                  <h1 className="text-2xl font-bold mb-2 text-black overflow-hidden whitespace-nowrap text-overflow-ellipsis">
-                    {venue.name}
-                  </h1>
-                  <p className="text-gray-600">{venue.description}</p>
-                  <p className="text-gray-600">Price: ${venue.price}</p>
-                  <p className="text-gray-600">Max Guests: {venue.maxGuests}</p>
-                  <p className="text-gray-600">Rating: {venue.rating}</p>
-                  {venue.meta && (
-                    <div className="mt-2 text-gray-600">
-                      {venue.meta.wifi && <span>WiFi</span>}
-                      {venue.meta.parking && <span>Parking</span>}
-                      {venue.meta.breakfast && <span>Breakfast</span>}
-                      {venue.meta.pets && <span>Pets</span>}
-                    </div>
-                  )}
-                  {venue.location && (
-                    <div className="mt-2 text-gray-600">
-                      <p>Address: {venue.location.address}</p>
-                      <p>City: {venue.location.city}</p>
-                      <p>Zip: {venue.location.zip}</p>
-                      <p>Country: {venue.location.country}</p>
-                    </div>
-                  )}
-                  <div className="flex justify-between mt-4">
-                    <button
-                      className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-200"
-                      onClick={() => handleUpdateItem(venue)}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors duration-200"
-                      onClick={() => handleDeleteItem(venue.id, true)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-black">No venues available.</p>
-            )}
-          </div>
-          {isVenueManager && (
+          {!isVenueManager && (
             <>
-              <h2 className="text-2xl font-bold mt-6 mb-4">
-                Bookings on Venues
+              <h2 className="text-2xl font-bold mt-6 mb-4 text-gray-600">
+                My Bookings
               </h2>
               <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 py-6 px-4">
                 {filteredBookings.length > 0 ? (
@@ -361,9 +291,27 @@ function ProfileVenues() {
                       key={booking.id}
                       className="bg-white p-6 rounded-md border-2 border-blue-300"
                     >
-                      <h1 className="text-2xl font-bold mb-2 text-black overflow-hidden whitespace-nowrap text-overflow-ellipsis">
+                      <h1 className="text-2xl font-bold mb-2 text-gray-600 overflow-hidden whitespace-nowrap text-overflow-ellipsis">
                         {booking.venue?.name || "Unknown Venue"}
                       </h1>
+                      {booking.venue?.media &&
+                      booking.venue.media.length > 0 ? (
+                        <img
+                          className="mt-4"
+                          src={
+                            typeof booking.venue.media[0] === "string"
+                              ? booking.venue.media[0]
+                              : booking.venue.media[0].url
+                          }
+                          alt={booking.venue.name}
+                        />
+                      ) : (
+                        <div className="mt-4 bg-gray-200 h-48 flex items-center justify-center">
+                          <span className="text-gray-600">
+                            No Image Available
+                          </span>
+                        </div>
+                      )}
                       <p className="text-gray-600">
                         Booking for {booking.guests} guests from{" "}
                         {formatDate(booking.dateFrom)} to{" "}
@@ -383,6 +331,107 @@ function ProfileVenues() {
                           Delete
                         </button>
                       </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-black">No bookings available.</p>
+                )}
+              </div>
+            </>
+          )}
+          {isVenueManager && (
+            <>
+              <h2 className="text-2xl font-bold mt-6 mb-4 text-gray-600">
+                My Venues
+              </h2>
+              <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 py-6 px-4">
+                {venues.length > 0 ? (
+                  venues.map((venue) => (
+                    <div
+                      key={venue.id}
+                      className="bg-white p-6 rounded-md border-2 border-blue-300"
+                    >
+                      <h1 className="text-2xl font-bold mb-2 text-gray-600 overflow-hidden whitespace-nowrap text-overflow-ellipsis">
+                        {venue.name}
+                      </h1>
+                      {venue.media && venue.media.length > 0 ? (
+                        <img
+                          className="mt-4"
+                          src={
+                            typeof venue.media[0] === "string"
+                              ? venue.media[0]
+                              : venue.media[0].url
+                          }
+                          alt={venue.name}
+                        />
+                      ) : (
+                        <div className="mt-4 bg-gray-200 h-48 flex items-center justify-center">
+                          <span className="text-gray-600">
+                            No Image Available
+                          </span>
+                        </div>
+                      )}
+                      <p className="text-gray-600">{venue.description}</p>
+                      <p className="text-gray-600">Price: ${venue.price}</p>
+                      <p className="text-gray-600">
+                        Max Guests: {venue.maxGuests}
+                      </p>
+                      <p className="text-gray-600">Rating: {venue.rating}</p>
+                      {venue.meta && (
+                        <div className="mt-2 text-gray-600">
+                          {venue.meta.wifi && <span>WiFi</span>}
+                          {venue.meta.parking && <span>Parking</span>}
+                          {venue.meta.breakfast && <span>Breakfast</span>}
+                          {venue.meta.pets && <span>Pets</span>}
+                        </div>
+                      )}
+                      {venue.location && (
+                        <div className="mt-2 text-gray-600">
+                          <p>Address: {venue.location.address}</p>
+                          <p>City: {venue.location.city}</p>
+                          <p>Zip: {venue.location.zip}</p>
+                          <p>Country: {venue.location.country}</p>
+                        </div>
+                      )}
+                      <div className="flex justify-between mt-4">
+                        <button
+                          className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors duration-200"
+                          onClick={() => handleUpdateItem(venue)}
+                        >
+                          Update
+                        </button>
+                        <button
+                          className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors duration-200"
+                          onClick={() => handleDeleteItem(venue.id, true)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-black">No venues available.</p>
+                )}
+              </div>
+              <h2 className="text-2xl font-bold mt-6 mb-4 text-gray-600">
+                Bookings on Venues
+              </h2>
+              <div className="grid lg:grid-cols-4 md:grid-cols-2 grid-cols-1 gap-4 py-6 px-4">
+                {filteredBookings.length > 0 ? (
+                  filteredBookings.map((booking) => (
+                    <div
+                      key={booking.id}
+                      className="bg-white p-6 rounded-md border-2 border-blue-300"
+                    >
+                      <h1 className="text-2xl font-bold mb-2 text-gray-600 overflow-hidden whitespace-nowrap text-overflow-ellipsis">
+                        {booking.venue?.name || "Unknown Venue"}
+                      </h1>
+                      <p className="text-gray-600">
+                        Booking for {booking.guests} guests from{" "}
+                        {formatDate(booking.dateFrom)} to{" "}
+                        {formatDate(booking.dateTo)}
+                      </p>
+                      {/* Removed Update and Delete buttons */}
                     </div>
                   ))
                 ) : (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import DatePickerModal from "../DatePickerModal";
 import BookingFormModal from "../BookingFormModal";
 
@@ -9,6 +10,7 @@ export default function VenueDetail() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [venueManager, setVenueManager] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const isVenueManager = JSON.parse(localStorage.getItem("venueManager"));
@@ -104,6 +106,12 @@ export default function VenueDetail() {
                 Book
               </button>
             )}
+            <button
+              onClick={() => router.navigate({ to: "/" })}
+              className="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition-colors duration-200"
+            >
+              Go Back
+            </button>
           </div>
         </div>
       )}

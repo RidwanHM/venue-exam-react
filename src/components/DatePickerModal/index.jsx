@@ -23,7 +23,7 @@ const DatePickerModal = ({ onClose, venue }) => {
       const accessToken = localStorage.getItem("access_token");
 
       const response = await fetch(
-        `${baseURL}/holidaze/bookings?_venue=${venue.id}`,
+        `${baseURL}/holidaze/venues/${venue.id}?_bookings=true`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -35,47 +35,37 @@ const DatePickerModal = ({ onClose, venue }) => {
         throw new Error(`Failed to fetch bookings. Status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      console.log("Full API response:", result);
 
-      if (!data || data.length === 0) {
-        throw new Error("No bookings found for this venue.");
+      if (result && result.bookings) {
+        const processedBookings = result.bookings.map((booking) => ({
+          start: new Date(booking.dateFrom),
+          end: new Date(booking.dateTo),
+        }));
+
+        setBookings(processedBookings);
+      } else {
+        setError("No bookings found for this venue.");
       }
-
-      const processedBookings = data.map((booking) => ({
-        start: new Date(booking.dateFrom),
-        end: new Date(booking.dateTo),
-      }));
-
-      setBookings(processedBookings);
     } catch (error) {
       setError(error.message);
+      console.error("Error fetching bookings:", error);
     }
   };
 
   const tileDisabled = ({ date }) => {
-    const disabled = bookings.some(
+    return bookings.some(
       (booking) => date >= booking.start && date <= booking.end
     );
-
-    if (disabled) {
-      // If the date is disabled, find the booking that matches the date
-      const matchingBooking = bookings.find(
-        (booking) => date >= booking.start && date <= booking.end
-      );
-
-      if (matchingBooking) {
-        console.log("Date:", date);
-        console.log("Booking Info:", matchingBooking);
-      }
-    }
-
-    return disabled;
   };
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
       <div className="bg-white p-4 rounded-md shadow-md w-full max-w-md h-full max-h-screen overflow-y-auto">
-        <h2 className="text-xl font-bold text-black mb-4">Available Dates</h2>
+        <h2 className="text-xl font-bold text-gray-600 mb-4">
+          Available Dates
+        </h2>
         <button
           onClick={onClose}
           className="text-sm font-semibold leading-6 text-gray-900 mb-4"
