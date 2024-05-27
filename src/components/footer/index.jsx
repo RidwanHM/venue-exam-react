@@ -10,7 +10,7 @@ function Footer() {
   return (
     <footer className="bg-blue-500 p-4">
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between">
-        <div className="text-white text-lg">© BMSF 2023</div>
+        <div className="text-white text-lg">© RHM 2024</div>
 
         <div className="my-4 lg:my-0">
           <img className="w-auto h-20 mx-auto" src={logo} alt="Your Company" />
